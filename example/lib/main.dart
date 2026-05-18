@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:stories/stories.dart';
+import 'package:storify/storify.dart';
 
 void main() {
   runApp(const StoriesExampleApp());
@@ -51,7 +51,6 @@ class _StoriesExampleAppState extends State<StoriesExampleApp> {
           textDirection: _rtl ? TextDirection.rtl : TextDirection.ltr,
           theme: _theme,
           child: child!,
-
         );
       },
       home: Scaffold(

@@ -16,9 +16,9 @@ class StoryVideoSlide extends StatefulWidget {
     this.fit,
     this.looping,
     this.loadingBuilder,
-  })  : assetPath = null,
-        file = null,
-        package = null;
+  }) : assetPath = null,
+       file = null,
+       package = null;
 
   const StoryVideoSlide.file(
     this.file, {
@@ -26,11 +26,11 @@ class StoryVideoSlide extends StatefulWidget {
     this.fit,
     this.looping,
     this.loadingBuilder,
-  })  : url = null,
-        assetPath = null,
-        httpHeaders = const {},
-        formatHint = null,
-        package = null;
+  }) : url = null,
+       assetPath = null,
+       httpHeaders = const {},
+       formatHint = null,
+       package = null;
 
   const StoryVideoSlide.asset(
     this.assetPath, {
@@ -39,10 +39,10 @@ class StoryVideoSlide extends StatefulWidget {
     this.fit,
     this.looping,
     this.loadingBuilder,
-  })  : url = null,
-        file = null,
-        httpHeaders = const {},
-        formatHint = null;
+  }) : url = null,
+       file = null,
+       httpHeaders = const {},
+       formatHint = null;
 
   final String? url;
   final File? file;

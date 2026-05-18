@@ -11,7 +11,12 @@ import 'story_progress_bar.dart';
 import 'story_slide_overlay.dart';
 
 /// Full-screen Instagram-like story viewer.
+///
+/// Shows segmented progress, header, gestures (tap, hold, swipe down), and
+/// optional title/subtitle overlays. Prefer [StoriesPanel] for tray + viewer,
+/// or call [StoryViewer.show] to open as a route.
 class StoryViewer extends StatefulWidget {
+  /// Creates a viewer. Usually opened via [show].
   const StoryViewer({
     super.key,
     required this.users,
@@ -31,10 +36,19 @@ class StoryViewer extends StatefulWidget {
     this.transitionCurve,
   });
 
+  /// All users that can be paged horizontally.
   final List<StoryUser> users;
+
+  /// Which user to show first.
   final int initialUserIndex;
+
+  /// Called when the viewer should close. Defaults to popping the route.
   final VoidCallback? onClose;
+
+  /// Called when a user has viewed all of their slides.
   final void Function(int userIndex, StoryUser user)? onUserSeen;
+
+  /// Called when the active slide changes.
   final void Function(int userIndex, int storyIndex)? onStoryChanged;
   final Color? backgroundColor;
   final StoryProgressBar Function(
@@ -62,7 +76,7 @@ class StoryViewer extends StatefulWidget {
   final Duration? transitionDuration;
   final Curve? transitionCurve;
 
-  /// Opens the viewer as a full-screen route.
+  /// Pushes a full-screen route containing this viewer.
   static Future<void> show(
     BuildContext context, {
     required List<StoryUser> users,
@@ -535,7 +549,7 @@ class _UserStoryPageState extends State<_UserStoryPage> {
                   fit: StackFit.expand,
                   children: [
                     ...previousChildren,
-                    ?currentChild,
+                    if (currentChild != null) currentChild,
                   ],
                 );
               },

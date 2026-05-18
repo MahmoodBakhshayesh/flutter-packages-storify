@@ -1,22 +1,41 @@
-name: stories
-description: Instagram-like stories with scrollable tray, full viewer gestures, and RTL support.
+name: storify
+description: >
+  Storify — Instagram-like stories for Flutter: scrollable tray, full-screen
+  viewer, RTL support, theming, transitions, and cached video slides.
 version: 0.1.0
-homepage: https://github.com/MahmoodBakhshayesh/flutter-packages-stories
-repository: https://github.com/MahmoodBakhshayesh/flutter-packages-stories
-issue_tracker: https://github.com/MahmoodBakhshayesh/flutter-packages-stories/issues
+homepage: https://github.com/MahmoodBakhshayesh/flutter-packages-storify
+repository: https://github.com/MahmoodBakhshayesh/flutter-packages-storify
+issue_tracker: https://github.com/MahmoodBakhshayesh/flutter-packages-storify/issues
+documentation: https://github.com/MahmoodBakhshayesh/flutter-packages-storify#readme
+
+topics:
+  - storify
+  - instagram
+  - stories
+  - social
+  - ui
+  - rtl
 
 environment:
-  sdk: ^3.11.5
-  flutter: ">=1.17.0"
+  sdk: ^3.5.0
+  flutter: ">=3.24.0"
 
 dependencies:
-  cached_video_player: ^2.0.4
   flutter:
     sdk: flutter
+  cached_video_player: ^2.0.4
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
+
+platforms:
+  android:
+  ios:
+  web:
+  windows:
+  macos:
+  linux:
 
 flutter:

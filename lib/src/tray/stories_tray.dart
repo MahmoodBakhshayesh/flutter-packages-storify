@@ -5,7 +5,11 @@ import '../theme/stories_theme_data.dart';
 import 'story_avatar.dart';
 
 /// Horizontal scrollable strip of story thumbnails (Instagram home row).
+///
+/// Each tile shows [StoryAvatar] and the user's [StoryUser.name].
+/// Call [onUserTap] to open a viewer or custom flow.
 class StoriesTray extends StatelessWidget {
+  /// Creates a story tray.
   const StoriesTray({
     super.key,
     required this.users,

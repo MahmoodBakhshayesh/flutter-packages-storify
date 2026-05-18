@@ -7,7 +7,10 @@ import '../content/story_video_slide.dart';
 import '../theme/stories_theme_data.dart';
 
 /// A single story slide belonging to a [StoryUser].
+///
+/// Use factories such as [imageUrl], [videoUrl], or [widget] for common cases.
 class StoryItem {
+  /// Creates a slide with a custom [builder].
   const StoryItem({
     required this.builder,
     this.duration,

@@ -2,9 +2,16 @@ import 'package:flutter/material.dart';
 
 import '../animations/story_transitions.dart';
 
-/// Styling defaults for tray, rings, viewer, and story slides.
+/// Styling and behavior defaults for the storify package.
+///
+/// Register on [ThemeData.extensions] or pass via [StoriesScope]/[StoriesTheme].
+///
+/// ```dart
+/// ThemeData(extensions: [StoriesThemeData.light]);
+/// ```
 @immutable
 class StoriesThemeData extends ThemeExtension<StoriesThemeData> {
+  /// Creates a fully specified theme. Prefer [light], [dark], or [copyWith].
   const StoriesThemeData({
     required this.trayHeight,
     required this.trayAvatarSize,
@@ -127,8 +134,10 @@ class StoriesThemeData extends ThemeExtension<StoriesThemeData> {
     ],
   );
 
+  /// Default theme (same as [light]).
   static StoriesThemeData get defaults => light;
 
+  /// Light theme preset with Instagram-like gradient rings.
   static StoriesThemeData get light => StoriesThemeData(
         trayHeight: 104,
         trayAvatarSize: 68,
@@ -186,6 +195,7 @@ class StoriesThemeData extends ThemeExtension<StoriesThemeData> {
         transitionCurve: Curves.easeOutCubic,
       );
 
+  /// Dark-friendly preset.
   static StoriesThemeData get dark => light.copyWith(
         seenRingColor: const Color(0xFF616161),
         avatarBackgroundColor: const Color(0xFF424242),

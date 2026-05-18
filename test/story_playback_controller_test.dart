@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:stories/src/controller/story_playback_controller.dart';
+import 'package:storify/src/controller/story_playback_controller.dart';
 
 void main() {
   group('StoryPlaybackController pause', () {

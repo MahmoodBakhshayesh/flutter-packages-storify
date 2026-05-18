@@ -28,8 +28,7 @@ class StorySlideOverlay extends StatelessWidget {
     }
 
     final theme = StoriesTheme.of(context);
-    final overlayPadding =
-        padding ?? theme.storyOverlayPadding;
+    final overlayPadding = padding ?? theme.storyOverlayPadding;
 
     return PositionedDirectional(
       top: 0,

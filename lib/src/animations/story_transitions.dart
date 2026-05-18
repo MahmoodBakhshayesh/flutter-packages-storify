@@ -109,9 +109,10 @@ class StoryItemTransitionBuilder {
     }
 
     return SlideTransition(
-      position: Tween<Offset>(begin: begin, end: Offset.zero).animate(
-        CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
-      ),
+      position: Tween<Offset>(
+        begin: begin,
+        end: Offset.zero,
+      ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOutCubic)),
       child: FadeTransition(
         opacity: Tween<double>(begin: 0.6, end: 1).animate(animation),
         child: child,
@@ -139,40 +140,26 @@ class StoryUserTransitionBuilder {
       case StoryUserTransition.page:
         return child;
       case StoryUserTransition.fade:
-        return Opacity(
-          opacity: (1 - t * 0.85).clamp(0.15, 1.0),
-          child: child,
-        );
+        return Opacity(opacity: (1 - t * 0.85).clamp(0.15, 1.0), child: child);
       case StoryUserTransition.scale:
         final scale = 1 - (t * 0.12);
         return Transform.scale(
           scale: scale,
-          child: Opacity(
-            opacity: (1 - t * 0.4).clamp(0.4, 1.0),
-            child: child,
-          ),
+          child: Opacity(opacity: (1 - t * 0.4).clamp(0.4, 1.0), child: child),
         );
       case StoryUserTransition.cube:
         final angle = offset * math.pi / 2;
         return Transform(
-          alignment: offset > 0
-              ? Alignment.centerRight
-              : Alignment.centerLeft,
+          alignment: offset > 0 ? Alignment.centerRight : Alignment.centerLeft,
           transform: Matrix4.identity()
             ..setEntry(3, 2, 0.001)
             ..rotateY(angle),
-          child: Opacity(
-            opacity: (1 - t * 0.3).clamp(0.5, 1.0),
-            child: child,
-          ),
+          child: Opacity(opacity: (1 - t * 0.3).clamp(0.5, 1.0), child: child),
         );
       case StoryUserTransition.slideVertical:
         return Transform.translate(
           offset: Offset(0, offset * pageSize.height * 0.25),
-          child: Opacity(
-            opacity: (1 - t * 0.5).clamp(0.5, 1.0),
-            child: child,
-          ),
+          child: Opacity(opacity: (1 - t * 0.5).clamp(0.5, 1.0), child: child),
         );
     }
   }

@@ -2,16 +2,25 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 
-/// Drives timed progression through story slides.
+/// Drives timed progression through story slides for one [StoryUser].
+///
+/// Notifies listeners on progress ticks and index changes. Used internally
+/// by [StoryViewer]; expose via [StoryPlaybackScope] for video slides.
 class StoryPlaybackController extends ChangeNotifier {
+  /// Creates a controller for the given slide [durations].
   StoryPlaybackController({
     required this.durations,
     this.onCompleted,
     this.onUserCompleted,
   });
 
+  /// Per-slide durations in order.
   final List<Duration> durations;
+
+  /// Called when the last slide timer completes (optional).
   final VoidCallback? onCompleted;
+
+  /// Called when the last slide ends (timer or manual advance).
   final VoidCallback? onUserCompleted;
 
   int _index = 0;
@@ -22,10 +31,16 @@ class StoryPlaybackController extends ChangeNotifier {
   DateTime? _segmentStartedAt;
   Duration _elapsedBeforePause = Duration.zero;
 
+  /// Index of the currently visible slide.
   int get index => _index;
+
+  /// Whether playback is paused (e.g. user is holding).
   bool get paused => _paused;
+
+  /// True if on the last slide.
   bool get isLast => _index >= durations.length - 1;
 
+  /// Progress of the current slide from `0.0` to `1.0`.
   double get progress {
     if (durations.isEmpty) return 0;
     final total = durations[_index].inMilliseconds;
@@ -37,10 +52,10 @@ class StoryPlaybackController extends ChangeNotifier {
   Duration _currentElapsed() {
     if (_segmentStartedAt == null) return _elapsedBeforePause;
     if (_paused) return _elapsedBeforePause;
-    return _elapsedBeforePause +
-        DateTime.now().difference(_segmentStartedAt!);
+    return _elapsedBeforePause + DateTime.now().difference(_segmentStartedAt!);
   }
 
+  /// Starts (or restarts) playback from [index].
   void start({int index = 0}) {
     _index = index.clamp(0, durations.isEmpty ? 0 : durations.length - 1);
     _elapsedBeforePause = Duration.zero;
@@ -50,6 +65,7 @@ class StoryPlaybackController extends ChangeNotifier {
     _notify();
   }
 
+  /// Pauses the current slide and freezes [progress].
   void pause() {
     if (_paused) return;
     // Capture elapsed time before flipping [_paused], otherwise
@@ -62,6 +78,7 @@ class StoryPlaybackController extends ChangeNotifier {
     _notify();
   }
 
+  /// Resumes from the paused position.
   void resume() {
     if (!_paused) return;
     _paused = false;
@@ -71,6 +88,7 @@ class StoryPlaybackController extends ChangeNotifier {
     _notify();
   }
 
+  /// Toggles between [pause] and [resume].
   void togglePause() {
     if (_paused) {
       resume();
@@ -101,6 +119,7 @@ class StoryPlaybackController extends ChangeNotifier {
     return false;
   }
 
+  /// Jumps to [index] and resets that slide's elapsed time.
   void jumpTo(int index) {
     if (durations.isEmpty) return;
     _goTo(index.clamp(0, durations.length - 1));

@@ -24,9 +24,16 @@ class StoriesPanel extends StatefulWidget {
     this.transitionCurve,
   });
 
+  /// Users displayed in the tray.
   final List<StoryUser> users;
+
+  /// Called when a user is marked seen after viewing their stories.
   final ValueChanged<List<StoryUser>>? onUsersChanged;
+
+  /// Shows a "Your story" tile at the start of the tray.
   final bool showAddButton;
+
+  /// Invoked when the add-story tile is tapped.
   final VoidCallback? onAddStoryTap;
 
   /// Overrides [StoriesThemeData.trayHeight].
@@ -38,16 +45,26 @@ class StoriesPanel extends StatefulWidget {
     int storyIndex,
     double progress,
     int storyCount,
-  )? progressBar;
+  )?
+  progressBar;
   final Widget Function(
     BuildContext context,
     StoryUser user,
     int userIndex,
     VoidCallback onClose,
-  )? headerBuilder;
+  )?
+  headerBuilder;
+
+  /// Overrides [StoriesThemeData.storyItemTransition].
   final StoryItemTransition? storyItemTransition;
+
+  /// Overrides [StoriesThemeData.userTransition].
   final StoryUserTransition? userTransition;
+
+  /// Overrides [StoriesThemeData.transitionDuration].
   final Duration? transitionDuration;
+
+  /// Overrides [StoriesThemeData.transitionCurve].
   final Curve? transitionCurve;
 
   @override

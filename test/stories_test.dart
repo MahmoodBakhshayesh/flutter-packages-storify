@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:stories/stories.dart';
+import 'package:storify/storify.dart';
 
 void main() {
   group('StoryPlaybackController', () {

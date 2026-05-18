@@ -4,6 +4,7 @@ import '../controller/story_playback_controller.dart';
 
 /// Exposes the active [StoryPlaybackController] to slide content (e.g. video).
 class StoryPlaybackScope extends InheritedWidget {
+  /// Creates a scope for [playback].
   const StoryPlaybackScope({
     super.key,
     required this.playback,

@@ -4,6 +4,7 @@ import '../theme/stories_theme_data.dart';
 
 /// Segmented progress indicators at the top of the story viewer.
 class StoryProgressBar extends StatelessWidget {
+  /// Creates a row of [count] segments; [activeProgress] fills the active one.
   const StoryProgressBar({
     super.key,
     required this.count,

@@ -4,6 +4,7 @@ import '../theme/stories_theme_data.dart';
 
 /// Circular avatar with Instagram-style gradient ring for unseen stories.
 class StoryAvatar extends StatelessWidget {
+  /// Creates an avatar ring. [seen] uses [seenRingColor] instead of the gradient.
   const StoryAvatar({
     super.key,
     required this.seen,

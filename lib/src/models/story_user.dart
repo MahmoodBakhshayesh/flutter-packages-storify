@@ -12,14 +12,22 @@ class StoryUser {
     this.seen = false,
   });
 
+  /// Unique identifier for this user.
   final String id;
+
+  /// Display name under the tray avatar and in the viewer header.
   final String name;
+
+  /// Avatar image for the tray ring and viewer header.
   final ImageProvider? avatar;
+
+  /// Ordered list of story slides for this user.
   final List<StoryItem> stories;
 
   /// When true, the tray shows a muted ring instead of the gradient.
   final bool seen;
 
+  /// Returns a copy with the given fields replaced.
   StoryUser copyWith({
     String? id,
     String? name,

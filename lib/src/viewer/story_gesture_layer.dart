@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 
 /// Instagram-style tap zones and hold-to-pause, RTL-aware via [AlignmentDirectional].
+///
+/// Tap start = previous, tap end = next, hold = pause/resume.
 class StoryGestureLayer extends StatefulWidget {
+  /// Creates a gesture layer over [child].
   const StoryGestureLayer({
     super.key,
     required this.onNext,

@@ -14,8 +14,13 @@ class StoriesScope extends StatelessWidget {
     this.theme,
   });
 
+  /// Child widget tree.
   final Widget child;
+
+  /// Overrides layout direction for stories (e.g. [TextDirection.rtl]).
   final TextDirection? textDirection;
+
+  /// Optional theme override for this subtree.
   final StoriesThemeData? theme;
 
   @override
@@ -27,10 +32,7 @@ class StoriesScope extends StatelessWidget {
     }
 
     if (textDirection != null) {
-      result = Directionality(
-        textDirection: textDirection!,
-        child: result,
-      );
+      result = Directionality(textDirection: textDirection!, child: result);
     }
 
     return result;
