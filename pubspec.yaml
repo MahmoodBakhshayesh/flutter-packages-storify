@@ -8,13 +8,6 @@ repository: https://github.com/MahmoodBakhshayesh/flutter-packages-storify
 issue_tracker: https://github.com/MahmoodBakhshayesh/flutter-packages-storify/issues
 documentation: https://github.com/MahmoodBakhshayesh/flutter-packages-storify#readme
 
-topics:
-  - storify
-  - instagram
-  - stories
-  - social
-  - ui
-  - rtl
 
 environment:
   sdk: ^3.5.0
