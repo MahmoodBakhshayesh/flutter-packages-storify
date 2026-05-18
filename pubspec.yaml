@@ -1,0 +1,22 @@
+name: stories
+description: Instagram-like stories with scrollable tray, full viewer gestures, and RTL support.
+version: 0.1.0
+homepage: https://github.com/MahmoodBakhshayesh/flutter-packages-stories
+repository: https://github.com/MahmoodBakhshayesh/flutter-packages-stories
+issue_tracker: https://github.com/MahmoodBakhshayesh/flutter-packages-stories/issues
+
+environment:
+  sdk: ^3.11.5
+  flutter: ">=1.17.0"
+
+dependencies:
+  cached_video_player: ^2.0.4
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
