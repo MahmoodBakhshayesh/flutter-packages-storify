@@ -23,6 +23,7 @@ class StoryViewer extends StatefulWidget {
     this.initialUserIndex = 0,
     this.onClose,
     this.onUserSeen,
+    this.onSeenStory,
     this.onStoryChanged,
     this.backgroundColor,
     this.progressBar,
@@ -45,8 +46,16 @@ class StoryViewer extends StatefulWidget {
   /// Called when the viewer should close. Defaults to popping the route.
   final VoidCallback? onClose;
 
-  /// Called when a user has viewed all of their slides.
-  final void Function(int userIndex, StoryUser user)? onUserSeen;
+  /// Called once per [StoryUser.id] when that user has viewed all of their slides.
+  ///
+  /// The package does not track seen user ids; persist state in this callback.
+  final ValueChanged<String>? onUserSeen;
+
+  /// Called once per [StoryItem.id] when that slide is considered seen
+  /// (timer finished, tap next, swipe away, or viewer closed).
+  ///
+  /// The package does not track seen ids; persist state in this callback.
+  final ValueChanged<String>? onSeenStory;
 
   /// Called when the active slide changes.
   final void Function(int userIndex, int storyIndex)? onStoryChanged;
@@ -81,7 +90,8 @@ class StoryViewer extends StatefulWidget {
     BuildContext context, {
     required List<StoryUser> users,
     int initialUserIndex = 0,
-    void Function(int userIndex, StoryUser user)? onUserSeen,
+    ValueChanged<String>? onUserSeen,
+    ValueChanged<String>? onSeenStory,
     void Function(int userIndex, int storyIndex)? onStoryChanged,
     StoryProgressBar Function(
       BuildContext context,
@@ -113,6 +123,7 @@ class StoryViewer extends StatefulWidget {
               initialUserIndex: initialUserIndex,
               onClose: () => Navigator.of(context).pop(),
               onUserSeen: onUserSeen,
+              onSeenStory: onSeenStory,
               onStoryChanged: onStoryChanged,
               progressBar: progressBar,
               headerBuilder: headerBuilder,
@@ -139,6 +150,8 @@ class _StoryViewerState extends State<StoryViewer> {
   bool _playbackInitialized = false;
   bool _isClosing = false;
   int? _lastNotifiedStoryIndex;
+  final Set<String> _seenStoryIdsThisSession = {};
+  final Set<String> _seenUserIdsThisSession = {};
 
   @override
   void initState() {
@@ -174,9 +187,8 @@ class _StoryViewerState extends State<StoryViewer> {
 
   void _initPlaybackForCurrentUser() {
     _playback?.dispose();
-    final durations = _currentUser.stories
-        .map((s) => s.resolveDuration(context))
-        .toList();
+    final durations =
+        _currentUser.stories.map((s) => s.resolveDuration(context)).toList();
     _playback = StoryPlaybackController(
       durations: durations,
       onUserCompleted: _onUserStoriesCompleted,
@@ -191,14 +203,39 @@ class _StoryViewerState extends State<StoryViewer> {
     if (playback == null) return;
 
     if (_lastNotifiedStoryIndex != playback.index) {
+      final previous = _lastNotifiedStoryIndex;
+      if (previous != null && playback.index > previous) {
+        _markStorySeenAt(previous);
+      }
       _lastNotifiedStoryIndex = playback.index;
       widget.onStoryChanged?.call(_userIndex, playback.index);
     }
   }
 
+  void _markStorySeenAt(int storyIndex) {
+    final stories = _currentUser.stories;
+    if (storyIndex < 0 || storyIndex >= stories.length) return;
+    final id = stories[storyIndex].id;
+    if (!_seenStoryIdsThisSession.add(id)) return;
+    widget.onSeenStory?.call(id);
+  }
+
+  void _markCurrentStorySeen() {
+    final playback = _playback;
+    if (playback == null) return;
+    _markStorySeenAt(playback.index);
+  }
+
+  void _markUserSeen() {
+    final id = _currentUser.id;
+    if (!_seenUserIdsThisSession.add(id)) return;
+    widget.onUserSeen?.call(id);
+  }
+
   void _onUserStoriesCompleted() {
     if (_isClosing) return;
-    widget.onUserSeen?.call(_userIndex, _currentUser);
+    _markCurrentStorySeen();
+    _markUserSeen();
     if (_userIndex < widget.users.length - 1) {
       _goToUser(_userIndex + 1);
     } else {
@@ -227,12 +264,16 @@ class _StoryViewerState extends State<StoryViewer> {
     if (_isClosing) return;
     if (index < 0 || index >= widget.users.length) return;
     if (index == _userIndex && _playback != null) return;
+    if (index != _userIndex) {
+      _markCurrentStorySeen();
+    }
     setState(() => _userIndex = index);
     _initPlaybackForCurrentUser();
   }
 
   void _close() {
     if (_isClosing) return;
+    _markCurrentStorySeen();
     _isClosing = true;
     _playback?.pause();
     if (widget.onClose != null) {
@@ -388,6 +429,7 @@ class _StoryViewerState extends State<StoryViewer> {
               titleStyle: widget.titleStyle,
               subtitleStyle: widget.subtitleStyle,
               onNext: () {
+                _markCurrentStorySeen();
                 if (!playback.next()) {
                   _onUserStoriesCompleted();
                 }

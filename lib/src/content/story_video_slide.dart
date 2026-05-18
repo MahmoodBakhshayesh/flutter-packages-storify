@@ -1,12 +1,15 @@
 import 'dart:io';
 
-import 'package:cached_video_player/cached_video_player.dart';
+import 'package:cached_video_player_plus/cached_video_player_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:video_player/video_player.dart';
 
 import '../theme/stories_theme_data.dart';
 import '../viewer/story_playback_scope.dart';
 
 /// Cached network/file/asset video slide; pauses when the story viewer pauses.
+///
+/// Uses [cached_video_player_plus] for network caching.
 class StoryVideoSlide extends StatefulWidget {
   const StoryVideoSlide.network(
     this.url, {
@@ -16,9 +19,9 @@ class StoryVideoSlide extends StatefulWidget {
     this.fit,
     this.looping,
     this.loadingBuilder,
-  }) : assetPath = null,
-       file = null,
-       package = null;
+  })  : assetPath = null,
+        file = null,
+        package = null;
 
   const StoryVideoSlide.file(
     this.file, {
@@ -26,11 +29,11 @@ class StoryVideoSlide extends StatefulWidget {
     this.fit,
     this.looping,
     this.loadingBuilder,
-  }) : url = null,
-       assetPath = null,
-       httpHeaders = const {},
-       formatHint = null,
-       package = null;
+  })  : url = null,
+        assetPath = null,
+        httpHeaders = const {},
+        formatHint = null,
+        package = null;
 
   const StoryVideoSlide.asset(
     this.assetPath, {
@@ -39,10 +42,10 @@ class StoryVideoSlide extends StatefulWidget {
     this.fit,
     this.looping,
     this.loadingBuilder,
-  }) : url = null,
-       file = null,
-       httpHeaders = const {},
-       formatHint = null;
+  })  : url = null,
+        file = null,
+        httpHeaders = const {},
+        formatHint = null;
 
   final String? url;
   final File? file;
@@ -59,40 +62,42 @@ class StoryVideoSlide extends StatefulWidget {
 }
 
 class _StoryVideoSlideState extends State<StoryVideoSlide> {
-  late CachedVideoPlayerController _controller;
+  CachedVideoPlayerPlus? _player;
   StoryPlaybackScope? _playbackScope;
 
   @override
   void initState() {
     super.initState();
-    _controller = _createController();
     _init();
   }
 
-  CachedVideoPlayerController _createController() {
+  CachedVideoPlayerPlus _createPlayer() {
     if (widget.url != null) {
-      return CachedVideoPlayerController.network(
-        widget.url!,
+      return CachedVideoPlayerPlus.networkUrl(
+        Uri.parse(widget.url!),
         httpHeaders: widget.httpHeaders,
         formatHint: widget.formatHint,
       );
     }
     if (widget.file != null) {
-      return CachedVideoPlayerController.file(widget.file!);
+      return CachedVideoPlayerPlus.file(widget.file!);
     }
-    return CachedVideoPlayerController.asset(
+    return CachedVideoPlayerPlus.asset(
       widget.assetPath!,
       package: widget.package,
     );
   }
 
   Future<void> _init() async {
-    await _controller.initialize();
+    final player = _createPlayer();
+    await player.initialize();
     if (!mounted) return;
+
     final theme = StoriesTheme.of(context);
-    await _controller.setLooping(widget.looping ?? theme.videoLooping);
+    await player.controller.setLooping(widget.looping ?? theme.videoLooping);
+    _player = player;
     _syncWithPlayback();
-    await _controller.play();
+    await player.controller.play();
     setState(() {});
   }
 
@@ -101,12 +106,15 @@ class _StoryVideoSlideState extends State<StoryVideoSlide> {
   }
 
   void _syncWithPlayback() {
-    if (!_controller.value.isInitialized) return;
+    final player = _player;
+    if (player == null || !player.isInitialized) return;
+
+    final controller = player.controller;
     final paused = _playbackScope?.playback.paused ?? false;
-    if (paused && _controller.value.isPlaying) {
-      _controller.pause();
-    } else if (!paused && !_controller.value.isPlaying) {
-      _controller.play();
+    if (paused && controller.value.isPlaying) {
+      controller.pause();
+    } else if (!paused && !controller.value.isPlaying) {
+      controller.play();
     }
   }
 
@@ -125,7 +133,7 @@ class _StoryVideoSlideState extends State<StoryVideoSlide> {
   @override
   void dispose() {
     _playbackScope?.playback.removeListener(_onPlaybackChanged);
-    _controller.dispose();
+    _player?.dispose();
     super.dispose();
   }
 
@@ -133,8 +141,9 @@ class _StoryVideoSlideState extends State<StoryVideoSlide> {
   Widget build(BuildContext context) {
     final theme = StoriesTheme.of(context);
     final fit = widget.fit ?? theme.videoFit;
+    final player = _player;
 
-    if (!_controller.value.isInitialized) {
+    if (player == null || !player.isInitialized) {
       final builder = widget.loadingBuilder ?? theme.videoLoadingBuilder;
       if (builder != null) return builder(context);
       return const Center(
@@ -142,13 +151,16 @@ class _StoryVideoSlideState extends State<StoryVideoSlide> {
       );
     }
 
+    final controller = player.controller;
+    final size = controller.value.size;
+
     return FittedBox(
       fit: fit,
       clipBehavior: Clip.hardEdge,
       child: SizedBox(
-        width: _controller.value.size.width,
-        height: _controller.value.size.height,
-        child: CachedVideoPlayer(_controller),
+        width: size.width,
+        height: size.height,
+        child: VideoPlayer(controller),
       ),
     );
   }

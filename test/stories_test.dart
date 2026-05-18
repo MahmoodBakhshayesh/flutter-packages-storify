@@ -70,8 +70,78 @@ void main() {
     expect(find.byType(StoryAvatar), findsOneWidget);
   });
 
+  testWidgets('onUserSeen fires when user stories complete', (tester) async {
+    final seenUserIds = <String>[];
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(extensions: [StoriesThemeData.light]),
+        home: StoryViewer(
+          users: [
+            StoryUser(
+              id: 'user-a',
+              name: 'Test',
+              stories: [
+                StoryItem(
+                  id: 'only-story',
+                  duration: const Duration(milliseconds: 80),
+                  builder: (_) => const ColoredBox(color: Colors.red),
+                ),
+              ],
+            ),
+          ],
+          onUserSeen: seenUserIds.add,
+        ),
+      ),
+    );
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 120));
+    await tester.pump();
+
+    expect(seenUserIds, ['user-a']);
+  });
+
+  testWidgets('onSeenStory fires when slide timer advances', (tester) async {
+    final seenIds = <String>[];
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(extensions: [StoriesThemeData.light]),
+        home: StoryViewer(
+          users: [
+            StoryUser(
+              id: 'u1',
+              name: 'Test',
+              stories: [
+                StoryItem(
+                  id: 'story-a',
+                  duration: const Duration(milliseconds: 80),
+                  builder: (_) => const ColoredBox(color: Colors.red),
+                ),
+                StoryItem(
+                  id: 'story-b',
+                  duration: const Duration(seconds: 5),
+                  builder: (_) => const ColoredBox(color: Colors.blue),
+                ),
+              ],
+            ),
+          ],
+          onSeenStory: seenIds.add,
+        ),
+      ),
+    );
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 120));
+    await tester.pump();
+
+    expect(seenIds, contains('story-a'));
+  });
+
   testWidgets('StoryItem resolves default duration from theme', (tester) async {
     const item = StoryItem(
+      id: 'test',
       builder: _placeholder,
     );
 

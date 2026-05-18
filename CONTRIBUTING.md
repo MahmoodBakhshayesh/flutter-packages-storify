@@ -5,8 +5,8 @@ Thank you for contributing to **storify**!
 ## Development setup
 
 ```bash
-git clone https://github.com/MahmoodBakhshayesh/flutter-packages-stories.git
-cd flutter-packages-stories
+git clone https://github.com/MahmoodBakhshayesh/flutter-packages-storify.git
+cd flutter-packages-storify
 flutter pub get
 cd example && flutter pub get
 ```
@@ -21,7 +21,7 @@ flutter test
 
 ## Changelog
 
-Add an entry under `## [Unreleased]` in [CHANGELOG.md](CHANGELOG.md) for user-visible changes.
+Add an entry at the top of [CHANGELOG.md](CHANGELOG.md) under `## [Unreleased]` (or the next version section) for user-visible changes.
 
 ## Pull requests
 

@@ -12,6 +12,8 @@ class StoriesPanel extends StatefulWidget {
     super.key,
     required this.users,
     this.onUsersChanged,
+    this.onUserSeen,
+    this.onSeenStory,
     this.showAddButton = false,
     this.onAddStoryTap,
     this.trayHeight,
@@ -27,8 +29,18 @@ class StoriesPanel extends StatefulWidget {
   /// Users displayed in the tray.
   final List<StoryUser> users;
 
-  /// Called when a user is marked seen after viewing their stories.
+  /// Called when the internal user list updates (e.g. tray seen ring).
   final ValueChanged<List<StoryUser>>? onUsersChanged;
+
+  /// Called with a [StoryUser.id] when that user has viewed all of their slides.
+  ///
+  /// Use this to persist per-user seen state (the package does not keep a list).
+  final ValueChanged<String>? onUserSeen;
+
+  /// Called with a [StoryItem.id] when that slide is considered seen.
+  ///
+  /// Use this to persist per-story seen state (the package does not keep a list).
+  final ValueChanged<String>? onSeenStory;
 
   /// Shows a "Your story" tile at the start of the tray.
   final bool showAddButton;
@@ -45,15 +57,13 @@ class StoriesPanel extends StatefulWidget {
     int storyIndex,
     double progress,
     int storyCount,
-  )?
-  progressBar;
+  )? progressBar;
   final Widget Function(
     BuildContext context,
     StoryUser user,
     int userIndex,
     VoidCallback onClose,
-  )?
-  headerBuilder;
+  )? headerBuilder;
 
   /// Overrides [StoriesThemeData.storyItemTransition].
   final StoryItemTransition? storyItemTransition;
@@ -88,11 +98,15 @@ class _StoriesPanelState extends State<StoriesPanel> {
     }
   }
 
-  void _markSeen(int userIndex, StoryUser user) {
-    setState(() {
-      _users[userIndex] = _users[userIndex].copyWith(seen: true);
-    });
-    widget.onUsersChanged?.call(_users);
+  void _handleUserSeen(String userId) {
+    final index = _users.indexWhere((u) => u.id == userId);
+    if (index >= 0 && !_users[index].seen) {
+      setState(() {
+        _users[index] = _users[index].copyWith(seen: true);
+      });
+      widget.onUsersChanged?.call(_users);
+    }
+    widget.onUserSeen?.call(userId);
   }
 
   @override
@@ -108,7 +122,8 @@ class _StoriesPanelState extends State<StoriesPanel> {
           context,
           users: _users,
           initialUserIndex: index,
-          onUserSeen: _markSeen,
+          onUserSeen: _handleUserSeen,
+          onSeenStory: widget.onSeenStory,
           progressBar: widget.progressBar,
           headerBuilder: widget.headerBuilder,
           storyItemTransition: widget.storyItemTransition,

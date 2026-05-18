@@ -14,7 +14,10 @@
 ///       id: '1',
 ///       name: 'Alex',
 ///       stories: [
-///         StoryItem.imageUrl('https://example.com/photo.jpg'),
+///         StoryItem.imageUrl(
+///           'https://example.com/photo.jpg',
+///           id: 'photo_1',
+///         ),
 ///       ],
 ///     ),
 ///   ],

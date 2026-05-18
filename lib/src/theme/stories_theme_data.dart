@@ -173,7 +173,8 @@ class StoriesThemeData extends ThemeExtension<StoriesThemeData> {
           fontWeight: FontWeight.w400,
           shadows: [Shadow(color: Colors.black45, blurRadius: 6)],
         ),
-        storyOverlayPadding: const EdgeInsetsDirectional.fromSTEB(16, 12, 16, 24),
+        storyOverlayPadding:
+            const EdgeInsetsDirectional.fromSTEB(16, 12, 16, 24),
         headerNameStyle: const TextStyle(
           color: Colors.white,
           fontWeight: FontWeight.w600,
@@ -286,8 +287,7 @@ class StoriesThemeData extends ThemeExtension<StoriesThemeData> {
       videoFit: videoFit ?? this.videoFit,
       videoLooping: videoLooping ?? this.videoLooping,
       videoLoadingBuilder: videoLoadingBuilder ?? this.videoLoadingBuilder,
-      storyItemTransition:
-          storyItemTransition ?? this.storyItemTransition,
+      storyItemTransition: storyItemTransition ?? this.storyItemTransition,
       userTransition: userTransition ?? this.userTransition,
       transitionDuration: transitionDuration ?? this.transitionDuration,
       transitionCurve: transitionCurve ?? this.transitionCurve,

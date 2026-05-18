@@ -15,7 +15,9 @@ A Flutter package for **Instagram-like stories**: scrollable thumbnail tray, ful
 
 - [Features](#features)
 - [Installation](#installation)
+- [Migrating from 0.1.0](#migrating-from-010)
 - [Quick start](#quick-start)
+- [Seen state](#seen-state)
 - [Widgets](#widgets)
 - [Models](#models)
 - [Theming](#theming)
@@ -43,8 +45,10 @@ A Flutter package for **Instagram-like stories**: scrollable thumbnail tray, ful
 | **Theming** | `StoriesThemeData` via `ThemeData.extensions` or `StoriesScope` |
 | **Transitions** | Configurable animations for slides and users (fade, slide, cube, …) |
 | **Hold to pause** | Progress freezes; video pauses in sync |
+| **Per-user seen** | `onUserSeen` callback with `StoryUser.id` (you own persistence) |
+| **Per-story seen** | `onSeenStory` callback with `StoryItem.id` (you own persistence) |
 | **Custom slides** | Any widget per slide via `StoryItem.builder` |
-| **Cached video** | `StoryItem.videoUrl` / `StoryVideoSlide` via `cached_video_player` |
+| **Cached video** | `StoryItem.videoUrl` / `StoryVideoSlide` via `cached_video_player_plus` |
 
 ---
 
@@ -54,7 +58,7 @@ Add to `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  storify: ^0.1.0
+  storify: ^0.2.0
 ```
 
 Then:
@@ -63,10 +67,32 @@ Then:
 flutter pub get
 ```
 
+**Requirements:** Dart `^3.5.0`, Flutter `>=3.24.0`. Supports Android, iOS, Web, Windows, macOS, and Linux.
+
 Import:
 
 ```dart
 import 'package:storify/storify.dart';
+```
+
+See [CHANGELOG.md](CHANGELOG.md) for release notes.
+
+---
+
+## Migrating from 0.1.0
+
+| Change | Action |
+|--------|--------|
+| **Story ids** | Add `id: '…'` to every `StoryItem` and factory (`imageUrl`, `videoUrl`, etc.). |
+| **Video backend** | No API change on your side; storify uses `cached_video_player_plus`. Remove `cached_video_player` from your app if unused elsewhere. |
+| **Seen tracking** | Optional: use `onUserSeen` / `onSeenStory` instead of only `onUsersChanged`. |
+
+```dart
+// 0.1.0
+StoryItem.imageUrl('https://example.com/1.jpg')
+
+// 0.2.0
+StoryItem.imageUrl('https://example.com/1.jpg', id: 'story_1')
 ```
 
 ---
@@ -96,6 +122,7 @@ class MyApp extends StatelessWidget {
               stories: [
                 StoryItem.imageUrl(
                   'https://example.com/story1.jpg',
+                  id: 'alex_story_1',
                   title: 'Alex',
                   subtitle: '2h ago',
                   caption: 'Hello!',
@@ -103,8 +130,14 @@ class MyApp extends StatelessWidget {
               ],
             ),
           ],
+          onUserSeen: (userId) {
+            // Persist per-user seen state (tray ring)
+          },
+          onSeenStory: (storyId) {
+            // Persist per-slide seen state
+          },
           onUsersChanged: (users) {
-            // Persist seen state
+            // Optional: sync tray when the panel updates seen rings
           },
         ),
       ),
@@ -112,6 +145,33 @@ class MyApp extends StatelessWidget {
   }
 }
 ```
+
+---
+
+## Seen state
+
+Storify does **not** keep a global list of seen users or stories. You persist ids in callbacks:
+
+| Callback | Id type | When it fires |
+|----------|---------|----------------|
+| `onUserSeen` | `StoryUser.id` | User finishes **all** slides (once per user per viewer session) |
+| `onSeenStory` | `StoryItem.id` | Slide is viewed — timer ends, tap next, swipe user, or close (once per story per session) |
+| `onUsersChanged` | full `List<StoryUser>` | `StoriesPanel` updates tray rings internally (optional sync) |
+
+```dart
+StoriesPanel(
+  users: users,
+  onUserSeen: (userId) async {
+    await prefs.setBool('user_seen_$userId', true);
+    setState(() => /* rebuild tray with StoryUser.seen */);
+  },
+  onSeenStory: (storyId) async {
+    await prefs.setBool('story_seen_$storyId', true);
+  },
+)
+```
+
+Set `StoryUser.seen: true` on users you have already marked seen so the tray shows gray rings on launch.
 
 ---
 
@@ -124,7 +184,9 @@ Combines **tray + viewer**. Tapping a user opens `StoryViewer`; completing their
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `users` | `List<StoryUser>` | required | Users shown in the tray |
-| `onUsersChanged` | `ValueChanged<List<StoryUser>>?` | null | Called when seen state updates |
+| `onUserSeen` | `ValueChanged<String>?` | null | Called with `StoryUser.id` when all slides are viewed |
+| `onSeenStory` | `ValueChanged<String>?` | null | Called with `StoryItem.id` when a slide is viewed |
+| `onUsersChanged` | `ValueChanged<List<StoryUser>>?` | null | Called when the panel updates its user list (e.g. tray ring) |
 | `showAddButton` | `bool` | `false` | Show “Your story” tile first |
 | `onAddStoryTap` | `VoidCallback?` | null | Add-button callback |
 | `trayHeight` | `double?` | theme | Tray height |
@@ -163,7 +225,8 @@ Full-screen story player.
 | `users` | `List<StoryUser>` | required | All users |
 | `initialUserIndex` | `int` | `0` | User to open first |
 | `onClose` | `VoidCallback?` | pop route | When viewer closes |
-| `onUserSeen` | `void Function(int, StoryUser)?` | null | User finished all slides |
+| `onUserSeen` | `ValueChanged<String>?` | null | Called with `StoryUser.id` when all slides are viewed |
+| `onSeenStory` | `ValueChanged<String>?` | null | Called with `StoryItem.id` when a slide is viewed |
 | `onStoryChanged` | `void Function(int, int)?` | null | `(userIndex, storyIndex)` |
 | `backgroundColor` | `Color?` | theme | Viewer background |
 | `storyItemTransition` | `StoryItemTransition?` | theme | Slide animation |
@@ -231,13 +294,14 @@ Video slide widget with caching; syncs pause with `StoryPlaybackScope`.
 
 | Field | Type | Description |
 |-------|------|-------------|
+| `id` | `String` | Unique slide id (used by `onSeenStory`) |
 | `builder` | `WidgetBuilder` | Slide content |
 | `duration` | `Duration?` | Slide length; uses theme default if null |
 | `title` | `String?` | Top overlay title |
 | `subtitle` | `String?` | Top overlay subtitle |
 | `caption` | `String?` | Bottom caption in viewer |
 
-**Factories:** `imageUrl`, `imageAsset`, `videoUrl`, `videoFile`, `videoAsset`, `widget`.
+**Factories:** `imageUrl`, `imageAsset`, `videoUrl`, `videoFile`, `videoAsset`, `widget` — each requires `id`.
 
 `resolveDuration(BuildContext)` returns effective duration from theme.
 
@@ -377,20 +441,17 @@ Presets: `StoriesThemeData.light`, `StoriesThemeData.dark`.
 ## Story content helpers
 
 ```dart
-// Network image
-StoryItem.imageUrl('https://…/photo.jpg', title: 'News', duration: Duration(seconds: 8))
+// Every slide needs a stable id (used by onSeenStory)
+StoryItem.imageUrl('https://…/photo.jpg', id: 'news_1', title: 'News')
 
-// Asset image
-StoryItem.imageAsset('assets/story.png')
+StoryItem.imageAsset('assets/story.png', id: 'local_1')
 
-// Cached video (see video setup)
-StoryItem.videoUrl('https://…/clip.mp4', caption: 'Watch')
+StoryItem.videoUrl('https://…/clip.mp4', id: 'clip_1', caption: 'Watch')
 
-// Custom widget
-StoryItem.widget(MySlide(), title: 'Poll', subtitle: 'Tap to vote')
+StoryItem.widget(MySlide(), id: 'poll_1', title: 'Poll')
 
-// Manual builder
 StoryItem(
+  id: 'custom_1',
   duration: Duration(seconds: 3),
   builder: (context) => MyCustomContent(),
 )
@@ -436,13 +497,13 @@ StoriesScope(
 
 ## Video setup
 
-This package uses [`cached_video_player`](https://pub.dev/packages/cached_video_player) (Android & iOS caching).
+This package uses [`cached_video_player_plus`](https://pub.dev/packages/cached_video_player_plus) for network video caching.
 
-1. Follow the [video_player installation](https://pub.dev/packages/video_player#installation) for Android and iOS.
+1. Follow the [video_player installation](https://pub.dev/packages/video_player#installation) for Android and iOS (required by the player).
 2. Use `StoryItem.videoUrl`, `videoFile`, or `videoAsset`.
 3. Video pauses when the user holds to pause stories.
 
-**Note:** Desktop is not supported by `cached_video_player`.
+Network videos are cached via `flutter_cache_manager`. Asset and file sources play directly without caching.
 
 ---
 
@@ -478,15 +539,16 @@ The example includes transition pickers, RTL toggle, and themed tray. See [examp
 | RTL | Limited | Full directional layout |
 | Theming | Partial | `StoriesThemeData` |
 | Transitions | — | Slide + user animations |
-| Seen state on tray | DIY | `StoryUser.seen` |
+| Seen state on tray | DIY | `StoryUser.seen` + `onUserSeen` |
+| Per-slide seen callback | — | `onSeenStory` |
 | Title/subtitle overlay | — | Per slide |
-| Cached video helper | — | `StoryItem.videoUrl` |
+| Cached video | — | `cached_video_player_plus` via `StoryItem.videoUrl` |
 
 ---
 
 ## Contributing
 
-Issues and pull requests are welcome on [GitHub](https://github.com/MahmoodBakhshayesh/flutter-packages-stories).
+Issues and pull requests are welcome on [GitHub](https://github.com/MahmoodBakhshayesh/flutter-packages-storify).
 
 ---
 

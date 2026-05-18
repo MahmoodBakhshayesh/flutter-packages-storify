@@ -17,6 +17,8 @@ flutter run
 - **User** transition picker (`StoryUserTransition`)
 - **LTR / RTL** toggle
 - Title, subtitle, and caption on slides
+- `onUserSeen` / `onSeenStory` callbacks (logged to console)
+- Stable `StoryItem.id` on every demo slide
 
 ## Try
 

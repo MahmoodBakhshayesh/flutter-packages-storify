@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:cached_video_player/cached_video_player.dart';
 import 'package:flutter/material.dart';
+import 'package:video_player/video_player.dart';
 
 import '../content/story_video_slide.dart';
 import '../theme/stories_theme_data.dart';
@@ -12,12 +12,16 @@ import '../theme/stories_theme_data.dart';
 class StoryItem {
   /// Creates a slide with a custom [builder].
   const StoryItem({
+    required this.id,
     required this.builder,
     this.duration,
     this.title,
     this.subtitle,
     this.caption,
   });
+
+  /// Unique id for this slide; passed to [StoriesPanel.onSeenStory].
+  final String id;
 
   /// Builds the story content (image, video wrapper, text, etc.).
   final WidgetBuilder builder;
@@ -37,6 +41,7 @@ class StoryItem {
   /// Network image story slide.
   factory StoryItem.imageUrl(
     String url, {
+    required String id,
     Duration? duration,
     String? title,
     String? subtitle,
@@ -45,6 +50,7 @@ class StoryItem {
     Map<String, String>? headers,
   }) {
     return StoryItem(
+      id: id,
       duration: duration,
       title: title,
       subtitle: subtitle,
@@ -77,6 +83,7 @@ class StoryItem {
   /// Asset image story slide.
   factory StoryItem.imageAsset(
     String asset, {
+    required String id,
     Duration? duration,
     String? title,
     String? subtitle,
@@ -85,6 +92,7 @@ class StoryItem {
     String? package,
   }) {
     return StoryItem(
+      id: id,
       duration: duration,
       title: title,
       subtitle: subtitle,
@@ -109,12 +117,14 @@ class StoryItem {
   /// Solid color or custom widget story slide.
   factory StoryItem.widget(
     Widget child, {
+    required String id,
     Duration? duration,
     String? title,
     String? subtitle,
     String? caption,
   }) {
     return StoryItem(
+      id: id,
       duration: duration,
       title: title,
       subtitle: subtitle,
@@ -123,9 +133,10 @@ class StoryItem {
     );
   }
 
-  /// Cached network video ([cached_video_player]).
+  /// Cached network video ([cached_video_player_plus]).
   factory StoryItem.videoUrl(
     String url, {
+    required String id,
     Duration? duration,
     String? title,
     String? subtitle,
@@ -136,6 +147,7 @@ class StoryItem {
     bool? looping,
   }) {
     return StoryItem(
+      id: id,
       duration: duration,
       title: title,
       subtitle: subtitle,
@@ -153,6 +165,7 @@ class StoryItem {
   /// Local file video story slide.
   factory StoryItem.videoFile(
     File file, {
+    required String id,
     Duration? duration,
     String? title,
     String? subtitle,
@@ -161,6 +174,7 @@ class StoryItem {
     bool? looping,
   }) {
     return StoryItem(
+      id: id,
       duration: duration,
       title: title,
       subtitle: subtitle,
@@ -176,6 +190,7 @@ class StoryItem {
   /// Asset video story slide.
   factory StoryItem.videoAsset(
     String asset, {
+    required String id,
     Duration? duration,
     String? title,
     String? subtitle,
@@ -185,6 +200,7 @@ class StoryItem {
     bool? looping,
   }) {
     return StoryItem(
+      id: id,
       duration: duration,
       title: title,
       subtitle: subtitle,

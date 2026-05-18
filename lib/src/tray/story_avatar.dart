@@ -43,9 +43,7 @@ class StoryAvatar extends StatelessWidget {
       child: DecoratedBox(
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          gradient: seen
-              ? null
-              : (unseenGradient ?? theme.unseenRingGradient),
+          gradient: seen ? null : (unseenGradient ?? theme.unseenRingGradient),
           color: seen ? ringColor : null,
         ),
         child: Padding(
@@ -66,7 +64,8 @@ class StoryAvatar extends StatelessWidget {
                       : placeholder ??
                           theme.avatarPlaceholder ??
                           ColoredBox(
-                            color: backgroundColor ?? theme.avatarBackgroundColor,
+                            color:
+                                backgroundColor ?? theme.avatarBackgroundColor,
                             child: Icon(
                               Icons.person,
                               size: inner * 0.5,

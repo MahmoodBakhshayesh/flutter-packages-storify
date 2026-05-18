@@ -25,18 +25,18 @@ class _StoriesExampleAppState extends State<StoriesExampleApp> {
   }
 
   StoriesThemeData get _theme => StoriesThemeData.light.copyWith(
-        trayAvatarSize: 72,
-        ringWidth: 3,
-        unseenRingGradient: const LinearGradient(
-          colors: [Color(0xFF833AB4), Color(0xFFE1306C), Color(0xFFF77737)],
-        ),
-        defaultStoryDuration: const Duration(seconds: 4),
-        progressBarHeight: 3,
-        addStoryLabel: 'Add',
-        addButtonColor: Colors.purple,
-        storyItemTransition: _storyTransition,
-        userTransition: _userTransition,
-      );
+    trayAvatarSize: 72,
+    ringWidth: 3,
+    unseenRingGradient: const LinearGradient(
+      colors: [Color(0xFF833AB4), Color(0xFFE1306C), Color(0xFFF77737)],
+    ),
+    defaultStoryDuration: const Duration(seconds: 4),
+    progressBarHeight: 3,
+    addStoryLabel: 'Add',
+    addButtonColor: Colors.purple,
+    storyItemTransition: _storyTransition,
+    userTransition: _userTransition,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -107,6 +107,12 @@ class _StoriesExampleAppState extends State<StoriesExampleApp> {
               showAddButton: true,
               onAddStoryTap: () {},
               onUsersChanged: (users) => setState(() => _users = users),
+              onUserSeen: (userId) {
+                debugPrint('Seen user: $userId');
+              },
+              onSeenStory: (storyId) {
+                debugPrint('Seen story: $storyId');
+              },
               storyItemTransition: _storyTransition,
               userTransition: _userTransition,
             ),
@@ -149,6 +155,7 @@ class _StoriesExampleAppState extends State<StoriesExampleApp> {
                 ),
               ),
             ),
+            id: 'user_${i}_story_$j',
             title: 'User ${i + 1}',
             subtitle: 'Story ${j + 1}',
             caption: j == 1 ? 'Bottom caption' : null,
