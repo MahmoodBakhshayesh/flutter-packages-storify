@@ -14,6 +14,7 @@ class StoryVideoSlide extends StatefulWidget {
   const StoryVideoSlide.network(
     this.url, {
     super.key,
+    this.storyDuration,
     this.httpHeaders = const {},
     this.formatHint,
     this.fit,
@@ -26,6 +27,7 @@ class StoryVideoSlide extends StatefulWidget {
   const StoryVideoSlide.file(
     this.file, {
     super.key,
+    this.storyDuration,
     this.fit,
     this.looping,
     this.loadingBuilder,
@@ -38,6 +40,7 @@ class StoryVideoSlide extends StatefulWidget {
   const StoryVideoSlide.asset(
     this.assetPath, {
     super.key,
+    this.storyDuration,
     this.package,
     this.fit,
     this.looping,
@@ -46,6 +49,9 @@ class StoryVideoSlide extends StatefulWidget {
         file = null,
         httpHeaders = const {},
         formatHint = null;
+
+  /// When set, overrides the loaded video length for story progress.
+  final Duration? storyDuration;
 
   final String? url;
   final File? file;
@@ -97,8 +103,30 @@ class _StoryVideoSlideState extends State<StoryVideoSlide> {
     await player.controller.setLooping(widget.looping ?? theme.videoLooping);
     _player = player;
     _syncWithPlayback();
+    _applyVideoDurationToPlayback();
     await player.controller.play();
     setState(() {});
+  }
+
+  void _applyVideoDurationToPlayback() {
+    if (widget.storyDuration != null) return;
+
+    final theme = StoriesTheme.of(context);
+    if (widget.looping ?? theme.videoLooping) return;
+
+    final player = _player;
+    if (player == null || !player.isInitialized) return;
+
+    final videoDuration = player.controller.value.duration;
+    if (videoDuration <= Duration.zero) return;
+
+    final playback = StoryPlaybackScope.maybeOf(context);
+    if (playback == null) return;
+
+    playback.updateDurationAt(playback.index, videoDuration);
+    if (playback.paused) {
+      playback.resume();
+    }
   }
 
   void _onPlaybackChanged() {

@@ -15,6 +15,7 @@ class StoryItem {
     required this.id,
     required this.builder,
     this.duration,
+    this.isVideo = false,
     this.title,
     this.subtitle,
     this.caption,
@@ -26,8 +27,17 @@ class StoryItem {
   /// Builds the story content (image, video wrapper, text, etc.).
   final WidgetBuilder builder;
 
-  /// Slide duration; when null, [StoriesThemeData.defaultStoryDuration] is used.
+  /// Slide duration.
+  ///
+  /// When null, images and widgets use [StoriesThemeData.defaultStoryDuration].
+  /// Video slides ([isVideo]) use the loaded video length unless [duration] is set.
   final Duration? duration;
+
+  /// Whether this slide is a video (see video factories).
+  final bool isVideo;
+
+  /// True when playback should follow the loaded video length.
+  bool get usesVideoDuration => isVideo && duration == null;
 
   /// Shown at the top of the slide (below the header row).
   final String? title;
@@ -149,11 +159,13 @@ class StoryItem {
     return StoryItem(
       id: id,
       duration: duration,
+      isVideo: true,
       title: title,
       subtitle: subtitle,
       caption: caption,
       builder: (context) => StoryVideoSlide.network(
         url,
+        storyDuration: duration,
         httpHeaders: httpHeaders,
         formatHint: formatHint,
         fit: fit,
@@ -176,11 +188,13 @@ class StoryItem {
     return StoryItem(
       id: id,
       duration: duration,
+      isVideo: true,
       title: title,
       subtitle: subtitle,
       caption: caption,
       builder: (context) => StoryVideoSlide.file(
         file,
+        storyDuration: duration,
         fit: fit,
         looping: looping,
       ),
@@ -202,11 +216,13 @@ class StoryItem {
     return StoryItem(
       id: id,
       duration: duration,
+      isVideo: true,
       title: title,
       subtitle: subtitle,
       caption: caption,
       builder: (context) => StoryVideoSlide.asset(
         asset,
+        storyDuration: duration,
         package: package,
         fit: fit,
         looping: looping,
@@ -214,7 +230,12 @@ class StoryItem {
     );
   }
 
-  /// Resolves slide duration from theme. Safe to call after [State.initState].
-  Duration resolveDuration(BuildContext context) =>
-      duration ?? StoriesThemeData.resolve(context).defaultStoryDuration;
+  /// Resolves slide duration for playback bootstrap.
+  ///
+  /// Video slides without an explicit [duration] return the theme default until
+  /// [StoryVideoSlide] reports the real video length.
+  Duration resolveDuration(BuildContext context) {
+    if (duration != null) return duration!;
+    return StoriesThemeData.resolve(context).defaultStoryDuration;
+  }
 }

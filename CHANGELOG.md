@@ -5,6 +5,18 @@ All notable changes to the **storify** package are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-05-18
+
+### Added
+
+- **Video story duration** — `StoryItem.videoUrl`, `videoFile`, and `videoAsset` use the loaded video length for progress when `duration` is omitted. Progress pauses briefly until the video is initialized.
+- `StoryPlaybackController.updateDurationAt` — updates a slide duration after async metadata loads.
+
+### Changed
+
+- Explicit `StoryItem.duration` still overrides video length (e.g. cap a long clip or show a looping segment for a fixed time).
+- When `StoriesThemeData.videoLooping` (or per-slide `looping: true`) is enabled, theme `defaultStoryDuration` is used unless `duration` is set.
+
 ## [0.2.0] - 2026-05-18
 
 ### Added
@@ -67,5 +79,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `StoryAvatar`, `StoryProgressBar`, `StorySlideOverlay`, `StoryGestureLayer`.
 - Example app with transition pickers and RTL toggle.
 
+[0.3.0]: https://github.com/MahmoodBakhshayesh/flutter-packages-storify/releases/tag/v0.3.0
 [0.2.0]: https://github.com/MahmoodBakhshayesh/flutter-packages-storify/releases/tag/v0.2.0
 [0.1.0]: https://github.com/MahmoodBakhshayesh/flutter-packages-storify/releases/tag/v0.1.0

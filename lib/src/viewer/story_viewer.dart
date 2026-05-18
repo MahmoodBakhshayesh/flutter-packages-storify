@@ -196,6 +196,19 @@ class _StoryViewerState extends State<StoryViewer> {
     _playback!.start();
     _lastNotifiedStoryIndex = 0;
     widget.onStoryChanged?.call(_userIndex, 0);
+    _maybePauseForVideoDuration(0);
+  }
+
+  void _maybePauseForVideoDuration(int storyIndex) {
+    final playback = _playback;
+    if (playback == null) return;
+
+    final stories = _currentUser.stories;
+    if (storyIndex < 0 || storyIndex >= stories.length) return;
+
+    if (stories[storyIndex].usesVideoDuration && !playback.paused) {
+      playback.pause();
+    }
   }
 
   void _onPlaybackTick() {
@@ -209,6 +222,7 @@ class _StoryViewerState extends State<StoryViewer> {
       }
       _lastNotifiedStoryIndex = playback.index;
       widget.onStoryChanged?.call(_userIndex, playback.index);
+      _maybePauseForVideoDuration(playback.index);
     }
   }
 

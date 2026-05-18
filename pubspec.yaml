@@ -2,7 +2,7 @@ name: storify
 description: >
   Storify — Instagram-like stories for Flutter: scrollable tray, full-screen
   viewer, RTL support, theming, transitions, and cached video slides.
-version: 0.2.0
+version: 0.3.0
 homepage: https://github.com/MahmoodBakhshayesh/flutter-packages-storify
 repository: https://github.com/MahmoodBakhshayesh/flutter-packages-storify
 issue_tracker: https://github.com/MahmoodBakhshayesh/flutter-packages-storify/issues

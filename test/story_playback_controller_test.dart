@@ -24,6 +24,19 @@ void main() {
       controller.dispose();
     });
 
+    test('updateDurationAt resets active segment timer', () async {
+      final controller = StoryPlaybackController(
+        durations: [const Duration(seconds: 10)],
+      );
+      controller.start();
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+
+      controller.updateDurationAt(0, const Duration(seconds: 2));
+      expect(controller.progress, lessThan(0.1));
+
+      controller.dispose();
+    });
+
     test('resumes from paused position', () async {
       final controller = StoryPlaybackController(
         durations: const [Duration(seconds: 10)],

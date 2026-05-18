@@ -15,7 +15,7 @@ A Flutter package for **Instagram-like stories**: scrollable thumbnail tray, ful
 
 - [Features](#features)
 - [Installation](#installation)
-- [Migrating from 0.1.0](#migrating-from-010)
+- [Migrating](#migrating)
 - [Quick start](#quick-start)
 - [Seen state](#seen-state)
 - [Widgets](#widgets)
@@ -58,7 +58,7 @@ Add to `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  storify: ^0.2.0
+  storify: ^0.3.0
 ```
 
 Then:
@@ -79,19 +79,25 @@ See [CHANGELOG.md](CHANGELOG.md) for release notes.
 
 ---
 
-## Migrating from 0.1.0
+## Migrating
+
+### From 0.2.0 → 0.3.0
+
+No breaking API changes. Video slides without `duration` now match the video length automatically. To keep a fixed timer, pass `duration` explicitly.
+
+### From 0.1.0 → 0.2.0+
 
 | Change | Action |
 |--------|--------|
 | **Story ids** | Add `id: '…'` to every `StoryItem` and factory (`imageUrl`, `videoUrl`, etc.). |
-| **Video backend** | No API change on your side; storify uses `cached_video_player_plus`. Remove `cached_video_player` from your app if unused elsewhere. |
+| **Video backend** | Storify uses `cached_video_player_plus`. Remove `cached_video_player` from your app if unused elsewhere. |
 | **Seen tracking** | Optional: use `onUserSeen` / `onSeenStory` instead of only `onUsersChanged`. |
 
 ```dart
 // 0.1.0
 StoryItem.imageUrl('https://example.com/1.jpg')
 
-// 0.2.0
+// 0.2.0+
 StoryItem.imageUrl('https://example.com/1.jpg', id: 'story_1')
 ```
 
@@ -296,7 +302,8 @@ Video slide widget with caching; syncs pause with `StoryPlaybackScope`.
 |-------|------|-------------|
 | `id` | `String` | Unique slide id (used by `onSeenStory`) |
 | `builder` | `WidgetBuilder` | Slide content |
-| `duration` | `Duration?` | Slide length; uses theme default if null |
+| `duration` | `Duration?` | Override slide length; see video behavior below |
+| `isVideo` | `bool` | `true` for video factories |
 | `title` | `String?` | Top overlay title |
 | `subtitle` | `String?` | Top overlay subtitle |
 | `caption` | `String?` | Bottom caption in viewer |
@@ -446,7 +453,11 @@ StoryItem.imageUrl('https://…/photo.jpg', id: 'news_1', title: 'News')
 
 StoryItem.imageAsset('assets/story.png', id: 'local_1')
 
+// Uses video length for progress (override with duration: …)
 StoryItem.videoUrl('https://…/clip.mp4', id: 'clip_1', caption: 'Watch')
+
+// Fixed 8s even if the file is longer
+StoryItem.videoUrl('https://…/clip.mp4', id: 'clip_2', duration: Duration(seconds: 8))
 
 StoryItem.widget(MySlide(), id: 'poll_1', title: 'Poll')
 
@@ -502,6 +513,16 @@ This package uses [`cached_video_player_plus`](https://pub.dev/packages/cached_v
 1. Follow the [video_player installation](https://pub.dev/packages/video_player#installation) for Android and iOS (required by the player).
 2. Use `StoryItem.videoUrl`, `videoFile`, or `videoAsset`.
 3. Video pauses when the user holds to pause stories.
+
+### Story duration for video
+
+| `duration` on `StoryItem` | `looping` | Progress timer |
+|---------------------------|-----------|----------------|
+| omitted | `false` (default) | **Video length** (loaded after init) |
+| set | any | **Your `duration`** |
+| omitted | `true` | Theme `defaultStoryDuration` |
+
+Progress waits until the video is initialized so the bar matches the real length. Set `duration` to cap or extend how long a slide stays open.
 
 Network videos are cached via `flutter_cache_manager`. Asset and file sources play directly without caching.
 

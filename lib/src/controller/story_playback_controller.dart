@@ -125,6 +125,23 @@ class StoryPlaybackController extends ChangeNotifier {
     _goTo(index.clamp(0, durations.length - 1));
   }
 
+  /// Updates the duration for [index] (e.g. after a video loads its length).
+  ///
+  /// When [index] is the active slide, the current segment timer is reset.
+  void updateDurationAt(int index, Duration newDuration) {
+    if (index < 0 || index >= durations.length) return;
+    if (newDuration <= Duration.zero) return;
+    if (durations[index] == newDuration) return;
+
+    durations[index] = newDuration;
+    if (_index == index && !_paused) {
+      _elapsedBeforePause = Duration.zero;
+      _segmentStartedAt = DateTime.now();
+      _scheduleTick();
+    }
+    _notify();
+  }
+
   void _goTo(int index) {
     _index = index;
     _elapsedBeforePause = Duration.zero;
